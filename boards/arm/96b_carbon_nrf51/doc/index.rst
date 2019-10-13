@@ -117,6 +117,50 @@ ARM Embedded, can be used as well.
    0xabcdef12 in ?? ()
    (gdb) load
 
+A generic ST-Link-v2 programmer could be used to program
+the NRF51 chip on the Carbon board as well.
+
+To use a generic ST-Link-V2 programmer, needs to install openocd first,
+
+.. code-block:: console
+
+    # Common dependencies
+    $ apt install pkg-config automake libtool
+
+    # openocd upstream repository
+    $ git clone git://git.code.sf.net/p/openocd/code openocd-code
+    $ cd openocd-code
+    $ ./bootstrap
+    $ ./configure
+    $ make
+    $ make instal
+
+and then create the configure file for nRF51 chip,
+
+.. code-block:: console
+
+    $ cat >carbon-nrf51-stlink-v2.cfg <<__EOF__
+    source [find interface/stlink-v2.cfg]
+    transport select hla_swd
+
+    set WORKAREASIZE 0x4000
+    source [find target/nrf51.cfg]
+    __EOF__
+
+and flash the generated zephyr.hex at last.
+
+.. code-block:: console
+
+    $ openocd -f carbon-nrf51-stlink-v2.cfg -c "program /pathto/zephyr.hex verify exit"
+
+Or to flash with zephyr west framework:
+
+.. code-block:: console
+
+    $ source zephyr-env.sh
+    $ west build -b 96b_carbon_nrf51 samples/bluetooth/hci_spi
+    $ west flash
+
 Debugging
 =========
 
